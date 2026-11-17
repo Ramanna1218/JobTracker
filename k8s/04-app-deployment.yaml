@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobtracker-app
+  namespace: jobtracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobtracker-app
+  template:
+    metadata:
+      labels:
+        app: jobtracker-app
+    spec:
+      containers:
+        - name: jobtracker-app
+          # Replace YOUR_DOCKERHUB_USERNAME with your actual Docker Hub username
+          image: YOUR_DOCKERHUB_USERNAME/jobtracker:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "postgres"
+            - name: DB_HOST
+              value: "postgres"  # matches the postgres Service name above
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "jobtracker"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: jobtracker-secrets
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jobtracker-secrets
+                  key: DB_PASSWORD
+            - name: GMAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: jobtracker-secrets
+                  key: GMAIL_USERNAME
+            - name: GMAIL_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jobtracker-secrets
+                  key: GMAIL_APP_PASSWORD
+            - name: JSEARCH_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jobtracker-secrets
+                  key: JSEARCH_API_KEY
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jobtracker-secrets
+                  key: ANTHROPIC_API_KEY
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "768Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jobtracker-app
+  namespace: jobtracker
+spec:
+  type: NodePort
+  selector:
+    app: jobtracker-app
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080  # reachable at http://<EC2-public-IP>:30080

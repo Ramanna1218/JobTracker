@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: jobtracker
+
+  # --- Local quick-start uses H2 (in-memory). Switch to postgres profile for real use. ---
+  datasource:
+    url: jdbc:h2:mem:jobtracker;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_APP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+mail:
+  from: ${GMAIL_USERNAME}
+
+# JSearch (RapidAPI) - sign up free at https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch
+jsearch:
+  api:
+    key: ${JSEARCH_API_KEY}
+    host: jsearch.p.rapidapi.com
+
+# Anthropic API - get a key at https://console.anthropic.com
+anthropic:
+  api:
+    key: ${ANTHROPIC_API_KEY}
+  # Cheap + fast is plenty for scoring. Change in .env (ANTHROPIC_MODEL) without touching code.
+  model: ${ANTHROPIC_MODEL:claude-haiku-5-5}
+
+jobtracker:
+  schedule:
+    cron: ${JOB_CRON:0 0 7 * * *}   # every day at 7:00 AM (container runs on US Eastern time)
+
+server:
+  port: 8080

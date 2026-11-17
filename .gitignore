@@ -1,0 +1,7 @@
+target/
+.env
+k8s/01-secrets.yaml
+*.log
+.idea/
+.vscode/
+register.json

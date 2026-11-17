@@ -1,0 +1,43 @@
+name: jobtracker-v3
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jobtracker
+      POSTGRES_USER: jobtracker
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobtracker -d jobtracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: jobtracker
+      DB_USERNAME: jobtracker
+      DB_PASSWORD: ${DB_PASSWORD}
+      GMAIL_USERNAME: ${GMAIL_USERNAME:?Set GMAIL_USERNAME in .env}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:?Set GMAIL_APP_PASSWORD in .env}
+      JSEARCH_API_KEY: ${JSEARCH_API_KEY:?Set JSEARCH_API_KEY in .env}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?Set ANTHROPIC_API_KEY in .env}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-5-5}
+      TZ: America/New_York
+      JAVA_TOOL_OPTIONS: -Duser.timezone=America/New_York
+    ports:
+      # 127.0.0.1 = reachable only from this PC (the API has no login yet)
+      - "127.0.0.1:8080:8080"
+
+volumes:
+  pgdata:

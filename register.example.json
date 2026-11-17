@@ -1,0 +1,8 @@
+{
+  "email": "you@example.com",
+  "password": "choose-a-password",
+  "fullName": "Your Name",
+  "resumeText": "Paste your resume as plain text here.",
+  "jobKeywords": "Software Engineer, Java Developer, Backend Engineer",
+  "locationPreference": "United States"
+}
